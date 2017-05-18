@@ -1,0 +1,5 @@
+<Boats>
+    <Boat name="The Fairlady" weight="100kg"/>
+    <!-- Uh oh! -->
+    <Boat name="The Fairlady II" name="Steak Sandwich" weight="125kg"/>
+</Boats>
