@@ -1,0 +1,6 @@
+[package]
+name = "duplicate-attrs"
+version = "0.1.0"
+authors = ["mike stedman <github@ravuya.com>"]
+
+[dependencies]
