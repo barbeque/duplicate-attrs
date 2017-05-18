@@ -13,15 +13,27 @@ fn print_usage() {
     println!("Usage: duplicate-attrs <xmlfile> [xmlfile2] ...")
 }
 
-fn detect_duplicates(element_name : &OwnedName, attrs : &Vec<OwnedAttribute>) {
+struct DiscoveredDuplicate {
+    pub element : String,
+    pub attribute_name : String
+}
+
+fn detect_duplicates(element_name : &OwnedName, attrs : &Vec<OwnedAttribute>) -> Vec<DiscoveredDuplicate> {
+    let mut result = Vec::<DiscoveredDuplicate>::new();
+
     for attr in attrs.iter() {
         let attrs_with_my_name = attrs.iter().filter(|&a| a.name == attr.name);
         if attrs_with_my_name.count() > 1  {
-            // We found a duplicate name
-            // TODO: Skip the other duplicate so we don't console spam
-            println!("Found duplicate attr on element {}: '{}'", element_name, attr.name);
+            // TODO: slightly inefficient since we'll hit this path at least twice if there's duplicates...
+            if !result.iter().any(|x| x.attribute_name == attr.name.local_name) {
+                result.push(
+                    DiscoveredDuplicate { element: element_name.local_name.clone(), attribute_name: attr.name.local_name.clone() }
+                )
+            }
         }
     }
+
+    result
 }
 
 fn check_buffer<R : std::io::Read>(buffer : R) {
@@ -33,7 +45,10 @@ fn check_buffer<R : std::io::Read>(buffer : R) {
         match e {
             Ok(XmlEvent::StartElement { name, attributes, .. }) => {
                 // Check attributes for duplicates
-                detect_duplicates(&name, &attributes);
+                let dupes = detect_duplicates(&name, &attributes);
+                for dupe in dupes {
+                    println!("Found duplicate attr on element {}: '{}'", dupe.element, dupe.attribute_name);                    
+                }
             }
             Err(e) => {
                 println!("Error interpreting xml: {}", e);
